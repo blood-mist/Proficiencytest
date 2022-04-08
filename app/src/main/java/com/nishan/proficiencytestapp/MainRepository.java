@@ -1,10 +1,9 @@
 package com.nishan.proficiencytestapp;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.nishan.proficiencytestapp.models.Items;
+import com.nishan.proficiencytestapp.models.StateLiveData;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -13,10 +12,10 @@ import retrofit2.Retrofit;
 
 public class MainRepository {
     private FetchDataService fetchDataService;
-    private MutableLiveData<Items> itemsLiveData;
+    private StateLiveData<Items> itemsLiveData;
 
     public MainRepository() {
-        itemsLiveData = new MutableLiveData<>();
+        itemsLiveData = new StateLiveData();
         Retrofit retrofit = ApiManager.getAdapter();
         fetchDataService=retrofit.create(FetchDataService.class);
     }
@@ -29,18 +28,19 @@ public class MainRepository {
                     @Override
                     public void onResponse(@NonNull Call<Items> call, @NonNull Response<Items> response) {
                         if (response.body() != null) {
-                            itemsLiveData.postValue(response.body());
+                            itemsLiveData.postSuccess(response.body());
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<Items> call, @NonNull Throwable t) {
-                        itemsLiveData.postValue(null);
+                    public void onFailure(Call<Items> call, Throwable t) {
+                        itemsLiveData.postError(t);
                     }
+
                 });
     }
 
-    public LiveData<Items> getItemsResponseLiveData() {
+    public StateLiveData<Items> getItemsResponseLiveData() {
         return itemsLiveData;
     }
 }

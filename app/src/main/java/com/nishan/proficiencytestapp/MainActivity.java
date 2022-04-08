@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.nishan.proficiencytestapp.databinding.ActivityMainBinding;
 import com.nishan.proficiencytestapp.models.Items;
+import com.nishan.proficiencytestapp.models.StateData;
 
 import java.util.Objects;
 
@@ -31,22 +32,15 @@ public class MainActivity extends AppCompatActivity {
         View view = mainBinding.getRoot();
         setContentView(view);
         adapter = new RecyclerAdapter();
-        swipeRefreshLayout=mainBinding.swipeContainer;
+        swipeRefreshLayout = mainBinding.swipeContainer;
         RecyclerView recyclerView = mainBinding.recyclerview;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         viewModel.init();
-        viewModel.getItemsLiveData().observe(this, items -> {
-            if (items != null) {
-                Objects.requireNonNull(getSupportActionBar()).setTitle(items.getTitle());
-                adapter.setResults(items.getRows());
-            }else{
-                //if items is null then there is something wrong with fecthing data from the API
-                Toast.makeText(this,"Something went wrong", Toast.LENGTH_SHORT).show();
-            }
-        });
+        viewModel.getItemsLiveData().observe(this, this::handleitems);
+
         viewModel.fetchData();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -58,5 +52,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void handleitems(StateData<Items> itemsStateData) {
+        switch (itemsStateData.getStatus()) {
+            case SUCCESS:
+                Items items = itemsStateData.getData();
+                assert items != null;
+                Objects.requireNonNull(getSupportActionBar()).setTitle(items.getTitle());
+                adapter.setResults(items.getRows());
+                break;
+            case ERROR:
+                Throwable e = itemsStateData.getError();
+                Toast.makeText(this, Objects.requireNonNull(e).getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                break;
+        }
     }
 }

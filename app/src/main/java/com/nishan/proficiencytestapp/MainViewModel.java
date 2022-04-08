@@ -4,13 +4,13 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
 
 import com.nishan.proficiencytestapp.models.Items;
+import com.nishan.proficiencytestapp.models.StateLiveData;
 
 public class MainViewModel extends AndroidViewModel {
     private MainRepository mainRepository;
-    private LiveData<Items> itemsLiveData;
+    private StateLiveData<Items> itemsLiveData;
 
     public MainViewModel(@NonNull Application application) {
         super(application);
@@ -24,7 +24,7 @@ public class MainViewModel extends AndroidViewModel {
         mainRepository.fetchData();
     }
 
-    public LiveData<Items> getItemsLiveData() {
+    public StateLiveData<Items> getItemsLiveData() {
         return itemsLiveData;
     }
 }
